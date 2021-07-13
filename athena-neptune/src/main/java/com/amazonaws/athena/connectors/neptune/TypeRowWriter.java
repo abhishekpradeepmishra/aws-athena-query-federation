@@ -38,19 +38,22 @@ import org.apache.arrow.vector.types.pojo.Field;
 
 import java.util.ArrayList;
 import java.util.Map;
+
 /**
  * This class is a Utility class to create Extractors for each field type as per
  * Schema
  */
-public final class TypeRowWriter
-{
-    private TypeRowWriter() 
-    {
-        //Empty private constructor
+public final class TypeRowWriter {
+    private TypeRowWriter() {
+        // Empty private constructor
     }
 
-    public static void writeRowTemplate(RowWriterBuilder rowWriterBuilder, Field field)
-    {
+    enum GraphElementType {
+        Vertex, Edge
+    }
+
+    public static void writeRowTemplate(RowWriterBuilder rowWriterBuilder, Field field,
+            Enum<GraphElementType> graphElementType) {
         ArrowType arrowType = field.getType();
         Types.MinorType minorType = Types.getMinorTypeForArrowType(arrowType);
 
@@ -88,12 +91,24 @@ public final class TypeRowWriter
                 rowWriterBuilder.withExtractor(field.getName(),
                         (IntExtractor) (Object context, NullableIntHolder value) -> {
                             Map<Object, Object> obj = (Map<Object, Object>) context;
-                            ArrayList<Object> objValues = (ArrayList) obj.get(field.getName());
 
                             value.isSet = 0;
-                            if (objValues != null && objValues.get(0) != null) {
-                                value.value = Integer.parseInt(objValues.get(0).toString());
-                                value.isSet = 1;
+                            if (graphElementType.equals(GraphElementType.Vertex)) {
+                                ArrayList<Object> objValues = (ArrayList) obj.get(field.getName());
+                               
+                                if (objValues != null && objValues.get(0) != null) {
+                                    value.value = Integer.parseInt(objValues.get(0).toString());
+                                    value.isSet = 1;
+                                }
+                            }
+                            else  if (graphElementType.equals(GraphElementType.Edge)) {
+
+                                Object fieldValue = obj.get(field.getName());
+
+                                if(fieldValue != null){
+                                    value.value = Integer.parseInt(fieldValue.toString());
+                                    value.isSet = 0;
+                                }
                             }
                         });
                 break;

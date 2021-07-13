@@ -25,6 +25,7 @@ import org.apache.arrow.vector.types.Types;
 import org.apache.arrow.vector.types.pojo.ArrowType;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
+import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 /**
@@ -52,7 +53,7 @@ public final class GremlinQueryPreProcessor
      * @param operator  Query Operator representing conditional operators e.g < , <=, >, >= , =
      * @return A Gremlin Query Part equivalent to Contraint.
      */
-    public static GraphTraversal<Vertex, Vertex> generateGremlinQueryPart(GraphTraversal<Vertex, Vertex> traversal, String key, String value, ArrowType type, Bound bound, Operator operator) 
+    public static GraphTraversal<Element, Element> generateGremlinQueryPart(GraphTraversal<Element, Element> traversal, String key, String value, ArrowType type, Bound bound, Operator operator) 
     {
         Types.MinorType minorType = Types.getMinorTypeForArrowType(type);
 
@@ -106,7 +107,7 @@ public final class GremlinQueryPreProcessor
      * @param operator  Query Operator representing conditional operators e.g < , <=, >, >= , =
      * @return A Gremlin Query Part equivalent for all Types
      */
-    private static GraphTraversal<Vertex, Vertex> updateTraversal(GraphTraversal<Vertex, Vertex> traversal, Bound bound, Operator operator, String key, Object value) 
+    private static GraphTraversal<Element, Element> updateTraversal(GraphTraversal<Element, Element> traversal, Bound bound, Operator operator, String key, Object value) 
     {
         if (operator.equals(Operator.GREATERTHAN)) {
             traversal = bound.equals(Bound.EXACTLY) ? traversal.has(key, P.gte(value))
